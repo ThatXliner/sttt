@@ -50,4 +50,4 @@ Contributions to this project are welcome! If you encounter any issues or have s
 
 ## License
 
-This library is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This library is licensed under the MIT License. See the [LICENSE](LICENSE-MIT) file for more information.

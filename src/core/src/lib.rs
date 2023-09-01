@@ -1,0 +1,182 @@
+//! # Super Tic Tic Toe
+//! This library provides a core that implements the logic
+//! for playing [Super Tic Tac Toe](https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe).
+//!
+//! The rules of said game are explained in the Wikipedia entry, with **one exception**: since it wasn't specified in the Wikipedia article, the behavior for ties within small, traditional 3x3 tic tac toe boards will result in that board being unable to use. It will be "dead" or "locked"; nobody can use that board in their 3-in-a-row final win.
+//!
+//! ## Terminology
+//! Because "board of boards" can get confusing on what you're referring
+//! to, I'll define some terms:
+//!
+//! **Game:** the entire 9x9 super tic-tac-toe game or "large board"
+//!
+//! **Coordinates:** An (x, y) pair where x and y are integers between and including 0 to 2. It represents the location of a section (a square for a board, a board for a game).
+//!
+//! **Board:** a traditional 3x3 tic-tac-toe game or "small board"
+//!
+//! **Square:** a cell of a traditional tic-tac-toe board. It will either be empty or containing an `X`/`O`,
+//!
+//! **Square coordinates:** An (x, y) pair that, like a normal coordinate, represents the location of something. But unlike a regular coordinate, it represents the exact location of a specific square. X and Y will be integers between and including 0 to 8.
+
+/// Represents a player (`X` or `O`)
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Player {
+    X,
+    O,
+}
+
+/// Represents a the content of a smaller Tic Tac Toe board
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
+
+pub enum Square {
+    #[default]
+    Empty,
+    Occupied(Player),
+}
+
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub enum GameState {
+    Tie,
+    Winner(Player),
+    InProgress,
+}
+
+/// The size length of the board *and* the game. This should never change.
+pub const BOARD_SIZE: usize = 3;
+/// Represents the 3x3 traditional Tic Tac Toe board
+#[derive(Debug, Default, Clone, Copy)]
+pub struct Board {
+    /// Self explanatory. Public to allow implementations of display methods
+    pub squares: [[Square; BOARD_SIZE]; BOARD_SIZE],
+}
+
+impl Board {
+    fn check_winner(&self, player: Player) -> bool {
+        // Check rows, columns, and diagonals for a win within a 3x3 cell
+        (0..BOARD_SIZE)
+            .any(|i| (0..BOARD_SIZE).all(|j| self.squares[i][j] == Square::Occupied(player)))
+            || (0..BOARD_SIZE)
+                .any(|j| (0..BOARD_SIZE).all(|i| self.squares[i][j] == Square::Occupied(player)))
+            || (0..BOARD_SIZE).all(|i| self.squares[i][i] == Square::Occupied(player))
+            || (0..BOARD_SIZE).all(|i| self.squares[i][2 - i] == Square::Occupied(player))
+    }
+    /// Get the winner of the game, if any
+    pub fn get_winner(&self) -> GameState {
+        if self.check_winner(Player::O) {
+            return GameState::Winner(Player::O);
+        }
+        if self.check_winner(Player::X) {
+            return GameState::Winner(Player::X);
+        }
+        // All cells are full
+        if self
+            .squares
+            .iter()
+            .all(|cols| cols.iter().all(|game| matches!(game, Square::Occupied(_))))
+        {
+            return GameState::Tie;
+        }
+        GameState::InProgress
+    }
+}
+
+/// Represents the 9x9 super Tic Tac Toe game. `X` starts
+#[derive(Debug, Clone, Copy)]
+pub struct Game {
+    /// Self explanatory. Public to allow implementations of display methods
+    pub boards: [[Board; BOARD_SIZE]; BOARD_SIZE],
+    /// The current player that will make the move when [`Game::make_move`] is called
+    pub current_player: Player,
+    /// The coordinates of the last move made by a player.
+    pub last_move_cords: Option<(usize, usize)>,
+}
+impl Default for Game {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl Game {
+    pub fn new() -> Self {
+        Game {
+            boards: Default::default(),
+            current_player: Player::X,
+            last_move_cords: None,
+        }
+    }
+    /// Make a move on the game. This method will also swap the [`Game::current_player`]
+    pub fn make_move(
+        &mut self,
+        board_row: usize,
+        board_col: usize,
+        cell_row: usize,
+        cell_col: usize,
+    ) -> Result<(), &'static str> {
+        // Check if the move is valid
+        if self.boards[board_row][board_col].squares[cell_row][cell_col] != Square::Empty {
+            return Err("Cell is already occupied");
+        }
+        if let Some((x, y)) = self.last_move_cords {
+            // X, Y is the coordinates of your opponent's last move
+            // If these coordinates don't match with the coordinates
+            // of the board that you want to put your piece in
+            // and the board with matching coordinates of (X, Y) hasn't
+            // finished, the move is illegal
+
+            // For example, let's say my opponent played in (0, 0, 2, 2)
+            // This means that they played in the top left board
+            // but the bottom right cell within that board.
+            // This means that my next move must be in the bottom right *board*
+            // unless that board has already been finished (there was a win or tie)
+            if (board_row, board_col) != (x, y)
+                && matches!(self.boards[x][y].get_winner(), GameState::InProgress)
+            {
+                return Err("You can't move in that board");
+            }
+        }
+
+        // Make the move
+        self.boards[board_row][board_col].squares[cell_row][cell_col] =
+            Square::Occupied(self.current_player);
+
+        // Switch to the next player
+        self.current_player = match self.current_player {
+            Player::X => Player::O,
+            Player::O => Player::X,
+        };
+
+        self.last_move_cords = Some((cell_row, cell_col));
+
+        Ok(())
+    }
+
+    /// Check if any of the boards has a winner
+    fn check_winner(&self, player: Player) -> bool {
+        // Columns
+        (0..BOARD_SIZE).any(|i| (0..BOARD_SIZE).all(|j| self.boards[i][j].get_winner() == GameState::Winner(player)))
+            || // Rows
+            (0..BOARD_SIZE).any(|j| {
+                (0..BOARD_SIZE).all(|i| self.boards[i][j].get_winner() == GameState::Winner(player))
+            })
+            ||  // y = -x Diagonals
+            (0..BOARD_SIZE).all(|i| self.boards[i][i].get_winner() == GameState::Winner(player))
+            || // y = x diagonals
+            (0..BOARD_SIZE).all(|i| self.boards[i][2 - i].get_winner() == GameState::Winner(player))
+    }
+    /// Get the winner of the game, if any
+    pub fn get_winner(&self) -> GameState {
+        if self.check_winner(Player::O) {
+            return GameState::Winner(Player::O);
+        }
+        if self.check_winner(Player::X) {
+            return GameState::Winner(Player::X);
+        }
+        // All boards have been finished
+        if self.boards.iter().all(|cols| {
+            cols.iter()
+                .all(|game| game.get_winner() != GameState::InProgress)
+        }) {
+            return GameState::Tie;
+        }
+        GameState::InProgress
+    }
+}

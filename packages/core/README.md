@@ -6,11 +6,10 @@ Docs are found [here](https://docs.rs/super-ttt)
 
 ## Installation
 
-To use this library, you can include it as a dependency in your `Cargo.toml` file:
+To use this library, add it to your `Cargo.toml` via
 
-```toml
-[dependencies]
-super_ttt = "0.1.0"
+```
+$ cargo add super-ttt
 ```
 
 ## Example

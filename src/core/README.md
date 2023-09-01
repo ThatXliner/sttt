@@ -2,7 +2,7 @@
 
 This Rust library provides a core implementation of the logic for playing Super Tic Tac Toe. Super Tic Tac Toe is an extended version of the traditional Tic Tac Toe game, played on a 9x9 grid of smaller Tic Tac Toe boards. The rules of the game are explained in detail in the [Wikipedia entry](https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe).
 
-Docs are found [here]()
+Docs are found [here](https://docs.rs/super-ttt)
 
 ## Installation
 

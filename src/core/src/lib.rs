@@ -17,24 +17,27 @@
 //! **Square:** a cell of a traditional tic-tac-toe board. It will either be empty or containing an `X`/`O`,
 //!
 //! **Square coordinates:** An (x, y) pair that, like a normal coordinate, represents the location of something. But unlike a regular coordinate, it represents the exact location of a specific square. X and Y will be integers between and including 0 to 8.
+#![warn(missing_docs)]
 
 /// Represents a player (`X` or `O`)
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[allow(missing_docs)]
 pub enum Player {
     X,
     O,
 }
 
 /// Represents a the content of a smaller Tic Tac Toe board
-#[derive(Clone, Copy, PartialEq, Debug, Default)]
-
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+#[allow(missing_docs)]
 pub enum Square {
     #[default]
     Empty,
     Occupied(Player),
 }
 
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[allow(missing_docs)]
 pub enum GameState {
     Tie,
     Winner(Player),
@@ -44,7 +47,7 @@ pub enum GameState {
 /// The size length of the board *and* the game. This should never change.
 pub const BOARD_SIZE: usize = 3;
 /// Represents the 3x3 traditional Tic Tac Toe board
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct Board {
     /// Self explanatory. Public to allow implementations of display methods
     pub squares: [[Square; BOARD_SIZE]; BOARD_SIZE],
@@ -81,7 +84,32 @@ impl Board {
 }
 
 /// Represents the 9x9 super Tic Tac Toe game. `X` starts
-#[derive(Debug, Clone, Copy)]
+///
+/// ## Example
+///
+/// ```
+/// # use super_ttt::{Game, Player};
+/// # fn main() {
+/// let mut game = Game::new();
+/// game.make_move(0, 0, 1, 1).unwrap();
+/// game.make_move(1, 1, 0, 0).unwrap();
+/// game.make_move(0, 1, 2, 2).unwrap();
+/// game.make_move(2, 2, 0, 2).unwrap();
+/// game.make_move(0, 2, 1, 0).unwrap();
+/// match game.get_winner() {
+///     super_tic_tac_toe::GameState::Winner(player) => {
+///         println!("Player {:?} wins!", player);
+///     }
+///     super_tic_tac_toe::GameState::Tie => {
+///         println!("It's a tie!");
+///     }
+///     super_tic_tac_toe::GameState::InProgress => {
+///         println!("The game is still in progress.");
+///     }
+/// }
+/// # }
+/// ```
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Game {
     /// Self explanatory. Public to allow implementations of display methods
     pub boards: [[Board; BOARD_SIZE]; BOARD_SIZE],
@@ -96,6 +124,7 @@ impl Default for Game {
     }
 }
 impl Game {
+    /// Create a new game. Default starting player is [`Player::X`]
     pub fn new() -> Self {
         Game {
             boards: Default::default(),

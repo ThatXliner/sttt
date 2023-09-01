@@ -18,7 +18,7 @@
 //!
 //! **Square coordinates:** An (x, y) pair that, like a normal coordinate, represents the location of something. But unlike a regular coordinate, it represents the exact location of a specific square. X and Y will be integers between and including 0 to 8.
 #![warn(missing_docs)]
-
+pub mod errors;
 /// Represents a player (`X` or `O`)
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[allow(missing_docs)]
@@ -139,10 +139,10 @@ impl Game {
         board_col: usize,
         cell_row: usize,
         cell_col: usize,
-    ) -> Result<(), &'static str> {
+    ) -> Result<(), errors::InvalidMoveError> {
         // Check if the move is valid
         if self.boards[board_row][board_col].squares[cell_row][cell_col] != Square::Empty {
-            return Err("Cell is already occupied");
+            return Err(errors::InvalidMoveError::CellAlreadyOccupied);
         }
         if let Some((x, y)) = self.last_move_cords {
             // X, Y is the coordinates of your opponent's last move
@@ -159,7 +159,7 @@ impl Game {
             if (board_row, board_col) != (x, y)
                 && matches!(self.boards[x][y].get_winner(), GameState::InProgress)
             {
-                return Err("You can't move in that board");
+                return Err(errors::InvalidMoveError::InvalidBoard);
             }
         }
 

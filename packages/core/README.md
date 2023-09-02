@@ -31,13 +31,13 @@ fn main() {
     game.make_move(0, 2, 1, 0).unwrap();
 
     match game.get_winner() {
-        super_tic_tac_toe::GameState::Winner(player) => {
+        super_ttt::GameState::Winner(player) => {
             println!("Player {:?} wins!", player);
         }
-        super_tic_tac_toe::GameState::Tie => {
+        super_ttt::GameState::Tie => {
             println!("It's a tie!");
         }
-        super_tic_tac_toe::GameState::InProgress => {
+        super_ttt::GameState::InProgress => {
             println!("The game is still in progress.");
         }
     }

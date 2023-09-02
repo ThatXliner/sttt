@@ -1,5 +1,5 @@
 //! This module contains the errors that [`super_ttt`](crate) may return.
-use std::error::Error;
+
 use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Making a move wasn't possible. Used by [`super_ttt::Game::make_move`][crate::Game::make_move]
@@ -20,16 +20,6 @@ impl fmt::Display for InvalidMoveError {
                 "the specified board does not match the coordinates of the opponent's last move"
                     .fmt(f)
             }
-        }
-    }
-}
-
-impl Error for InvalidMoveError {
-    #[allow(deprecated)]
-    fn description(&self) -> &str {
-        match self {
-            InvalidMoveError::CellAlreadyOccupied => "the specified cell is already occupied",
-            InvalidMoveError::InvalidBoard => "you can't move in that board",
         }
     }
 }

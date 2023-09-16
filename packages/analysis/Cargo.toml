@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 ai = { version = "0.1.0", path = "../ai" }
 rayon = "1.7.0"
-super-ttt = { version = "0.1.2", path = "../core" }
+super-ttt = { version = "0.2.0", path = "../core" }

@@ -18,6 +18,8 @@
 //!
 //! **Square coordinates:** An (x, y) pair that, like a normal coordinate, represents the location of something. But unlike a regular coordinate, it represents the exact location of a specific square. X and Y will be integers between and including 0 to 8.
 #![warn(missing_docs)]
+
+use std::fmt::Display;
 pub mod errors;
 /// Represents a player (`X` or `O`)
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -93,7 +95,7 @@ impl Board {
 /// let mut game = Game::new();
 /// game.make_move(0, 0, 1, 1).unwrap();
 /// game.make_move(1, 1, 0, 0).unwrap();
-/// game.make_move(0, 1, 2, 2).unwrap();
+/// game.make_move(0, 0, 2, 2).unwrap();
 /// game.make_move(2, 2, 0, 2).unwrap();
 /// game.make_move(0, 2, 1, 0).unwrap();
 /// match game.get_winner() {
@@ -109,6 +111,9 @@ impl Board {
 /// }
 /// # }
 /// ```
+///
+/// This is essentially just a game state
+/// with some relevant methods attached to it.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Game {
     /// Self explanatory. Public to allow implementations of display methods
@@ -121,6 +126,35 @@ pub struct Game {
 impl Default for Game {
     fn default() -> Self {
         Self::new()
+    }
+}
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "┏━━━┳━━━┳━━━┓\n")?;
+        for board_rows in 0..3 {
+            for cell_row in 0..3 {
+                write!(f, "┃")?;
+                for board in 0..3 {
+                    for cell_col in 0..3 {
+                        let cell = self.boards[board_rows][board].squares[cell_row][cell_col];
+                        let symbol = match cell {
+                            Square::Empty => " ",
+                            Square::Occupied(Player::X) => "X",
+                            Square::Occupied(Player::O) => "O",
+                        };
+                        write!(f, "{}", symbol)?;
+                    }
+                    write!(f, "┃")?;
+                }
+                write!(f, "\n")?;
+            }
+            if board_rows == 2 {
+                write!(f, "┗━━━┻━━━┻━━━┛\n")?;
+            } else {
+                write!(f, "┣━━━╋━━━╋━━━┫\n")?;
+            }
+        }
+        Ok(())
     }
 }
 impl Game {
@@ -139,7 +173,7 @@ impl Game {
         board_col: usize,
         cell_row: usize,
         cell_col: usize,
-    ) -> Result<(), errors::InvalidMoveError> {
+    ) -> Result<Self, errors::InvalidMoveError> {
         // Check if the move is valid
         if self.boards[board_row][board_col].squares[cell_row][cell_col] != Square::Empty {
             return Err(errors::InvalidMoveError::CellAlreadyOccupied);
@@ -175,7 +209,7 @@ impl Game {
 
         self.last_move_cords = Some((cell_row, cell_col));
 
-        Ok(())
+        Ok(*self)
     }
 
     /// Check if any of the boards has a winner
@@ -207,5 +241,15 @@ impl Game {
             return GameState::Tie;
         }
         GameState::InProgress
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem;
+
+    #[test]
+    fn game_struct_size() {
+        assert_eq!(mem::size_of::<Game>(), 112);
     }
 }

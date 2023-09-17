@@ -130,7 +130,7 @@ impl Default for Game {
 }
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "┏━━━┳━━━┳━━━┓\n")?;
+        writeln!(f, "┏━━━┳━━━┳━━━┓")?;
         for board_rows in 0..3 {
             for cell_row in 0..3 {
                 write!(f, "┃")?;
@@ -146,12 +146,12 @@ impl Display for Game {
                     }
                     write!(f, "┃")?;
                 }
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
             if board_rows == 2 {
-                write!(f, "┗━━━┻━━━┻━━━┛\n")?;
+                writeln!(f, "┗━━━┻━━━┻━━━┛")?;
             } else {
-                write!(f, "┣━━━╋━━━╋━━━┫\n")?;
+                writeln!(f, "┣━━━╋━━━╋━━━┫")?;
             }
         }
         Ok(())

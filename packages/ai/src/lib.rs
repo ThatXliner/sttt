@@ -5,7 +5,7 @@ pub fn apply_move(
     (board_row, board_col, cell_row, cell_col): (usize, usize, usize, usize),
     mut game: Game,
 ) -> Result<Game, errors::InvalidMoveError> {
-    return game.make_move(board_row, board_col, cell_row, cell_col);
+    game.make_move(board_row, board_col, cell_row, cell_col)
 }
 pub type Move = (usize, usize, usize, usize);
 pub fn get_valid_moves(node: Game) -> Vec<Move> {
@@ -49,7 +49,7 @@ pub fn simulate_game(node: Game) -> (Vec<Game>, i8) {
         );
     }
     visited_nodes.push(current_node);
-    return (
+    (
         visited_nodes,
         match current_node.get_winner() {
             GameState::Tie => 0,
@@ -62,5 +62,5 @@ pub fn simulate_game(node: Game) -> (Vec<Game>, i8) {
             }
             GameState::InProgress => unreachable!(),
         },
-    );
+    )
 }

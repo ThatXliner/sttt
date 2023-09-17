@@ -56,14 +56,12 @@ impl MTCS {
             let current_node = get_valid_moves(selected_node)
                 .iter()
                 .map(|move_| {
-                    apply_move(*move_, selected_node.clone()).expect("invalid moves were generated")
-                })
-                .filter(|new_state| new_node.children.contains(new_state))
-                .next()
+                    apply_move(*move_, selected_node).expect("invalid moves were generated")
+                }).find(|new_state| new_node.children.contains(new_state))
                 // selected_node shouldn't be fully expanded
                 // so this should never panic
-                .expect(format!("{:?} {selected_node}", search_iteration).as_ref());
-            new_node.children.insert(current_node.clone());
+                .unwrap_or_else(|| panic!("{:?} {selected_node}", search_iteration));
+            new_node.children.insert(current_node);
 
             // Simulation phase
             let (visited_nodes, final_result) = simulate_game(current_node);
@@ -118,7 +116,7 @@ impl MTCS {
                     * (self.tree_data[&parent].visit_count as f64).log2())
                     / data.visit_count as f64)
                     .sqrt();
-                return exploitation_term + exploration_term;
+                exploitation_term + exploration_term
             }
             None => f64::INFINITY,
         }
@@ -130,13 +128,13 @@ impl MTCS {
         get_valid_moves(node)
             .iter()
             .reduce(|a, b| {
-                if self.ucb1(apply_move(*a, node.clone()).unwrap(), node)
-                    > self.ucb1(apply_move(*b, node.clone()).unwrap(), node)
+                if self.ucb1(apply_move(*a, node).unwrap(), node)
+                    > self.ucb1(apply_move(*b, node).unwrap(), node)
                 {
-                    return a;
+                    a
                 } else {
-                    return b;
-                };
+                    b
+                }
             })
             .and_then(|&(board_row, board_col, cell_row, cell_col)| {
                 node.clone()

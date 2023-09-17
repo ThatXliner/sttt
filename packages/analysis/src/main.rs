@@ -10,7 +10,7 @@ fn main() {
     const REPETITION_TIMES: usize = 10_000;
     fn main() {
         println!("Going to implement monte carlo from scratch");
-        let mut results = Arc::new(Mutex::new(HashMap::from([(0, 0), (-1, 0), (1, 0)])));
+        let results = Arc::new(Mutex::new(HashMap::from([(0, 0), (-1, 0), (1, 0)])));
         (0..REPETITION_TIMES).into_par_iter().for_each(|_| {
             results
                 .clone()

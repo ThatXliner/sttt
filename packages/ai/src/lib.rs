@@ -35,18 +35,17 @@ pub fn get_valid_moves(node: Game) -> Vec<Move> {
     valid_moves
 }
 pub fn simulate_game(node: Game) -> (Vec<Game>, i8) {
-    let current_node = node;
+    let mut current_node = node;
     let mut visited_nodes = vec![node];
     while current_node.get_winner() == GameState::InProgress {
-        visited_nodes.push(
-            apply_move(
-                *get_valid_moves(current_node)
-                    .choose(&mut rand::thread_rng())
-                    .expect("No valid moves"),
-                current_node,
-            )
-            .expect("Invalid move generated"),
-        );
+        current_node = apply_move(
+            *get_valid_moves(current_node)
+                .choose(&mut rand::thread_rng())
+                .expect("No valid moves"),
+            current_node,
+        )
+        .expect("Invalid move generated");
+        visited_nodes.push(current_node);
     }
     visited_nodes.push(current_node);
     (
